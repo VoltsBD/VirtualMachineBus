@@ -1,0 +1,100 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 03.11.2023 08:03:54
+// Design Name: 
+// Module Name: AMBA
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+
+module VMBA(  // VIRTUAL MACHINE BUS ARCHITECTURE
+    input wire rst,
+    input wire clk,
+    input wire [7:0] R3CTRL, // DATALINES for CONTROL PINS OE,LD,ETC
+    input wire [7:0] R4DATA, // DATA BUS TO BRING DATA to PPI
+    input wire [7:0] R5ADDR, // UPPER NIBBLE is for OUTPUT MUX and LOWER NIBBLE is for OUTPUT DEMUX
+    output reg [7:0] R3OUTCRL, // DATALINES for CONTROL PINS OE,LD,ETC
+    output reg [7:0] DTCMDONE,  // INPUT 1 DEVICE CMD or DATA
+    output reg [7:0] DTCMDTWO,  // INPUT 2 DEVICE CMD or DATA
+    output reg [7:0] DTCMDTHREE, // INPUT 3 DEVICE CMD or DATA
+    output reg [7:0] DTCMDFOUR,  // INPUT 4 DEVICE CMD or DATA
+    input wire [7:0] DTINONE,    // DATA OUTPUT from DEVICE 1
+    input wire [7:0] DTW,    // DATA OUTPUT from DEVICE 2
+    input wire [7:0] DTINTHREE,    // DATA OUTPUT from DEVICE 3
+    input wire [7:0] DTINFOUR,    // DATA OUTPUT from DEVICE 4
+    output reg [7:0] AMBAOUT,     // MUX BUS TO PROCESSOR
+    output reg [3:0] CLKBUS,       // MULTIPLE CLOCK
+    output reg [3:0] RSTBUS
+    );
+    
+reg [7:0] DTONE;
+reg [7:0] DTTWO;
+reg [7:0] DTTHREE;
+reg [7:0] DTFOUR;
+reg [7:0] INONE;
+reg [7:0] NTWO;
+reg [7:0] INTHREE;
+reg [7:0] INFOUR;
+
+always@(posedge clk)
+begin 
+    if(!rst)
+        begin
+        R3OUTCRL=8'h00;
+        CLKBUS=4'h0;
+        RSTBUS=4'h0;
+        DTONE=8'h00;
+        DTTWO=8'h00;
+        DTTHREE=8'h00;
+        DTFOUR=8'h00;
+        INONE=8'h00;
+        NTWO=8'h00;
+        INTHREE=8'h00;
+        INFOUR=8'h00;
+        end
+    if(rst)
+        begin
+        R3OUTCRL=R3CTRL;
+        CLKBUS=4'hF; 
+        RSTBUS=4'hF;
+        INONE = DTINONE;
+        NTWO = DTW;
+        INTHREE = DTINTHREE;
+        INFOUR = DTINFOUR;
+        case(R5ADDR[3:0])
+            4'd0: DTONE=R4DATA;
+            4'd1: DTTWO=R4DATA;
+            4'd2: DTTHREE=R4DATA;
+            4'd4: DTFOUR=R4DATA;
+            endcase
+        case(R5ADDR[7:4])
+             4'd0: AMBAOUT=INONE;
+             4'd1: AMBAOUT=NTWO;
+             4'd2: AMBAOUT=INTHREE;
+             4'd4: AMBAOUT=INFOUR;
+             endcase
+        end
+end
+always@(negedge clk)
+begin
+CLKBUS=4'h0; //  LOWERS COMMON CLOCKS
+DTCMDONE=DTONE;
+DTCMDTWO=DTTWO;
+DTCMDTHREE=DTTHREE;
+DTCMDFOUR=DTFOUR;
+end
+
+endmodule
