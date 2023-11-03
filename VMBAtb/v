@@ -1,0 +1,64 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date: 03.11.2023 08:45:57
+// Design Name: 
+// Module Name: VMBAtb
+// Project Name: 
+// Target Devices: 
+// Tool Versions: 
+// Description: 
+// 
+// Dependencies: 
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+//////////////////////////////////////////////////////////////////////////////////
+
+
+module VMBAtb;
+
+ reg rsttb;
+ reg clktb;
+ reg [7:0] R3CTRLtb; // DATALINES for CONTROL PINS OE,LD,ETC
+ reg [7:0] R4DATAtb; // DATA BUS TO BRING DATA to PPI
+ reg [7:0] R5ADDRtb; // UPPER NIBBLE is for OUTPUT MUX and LOWER NIBBLE is for OUTPUT DEMUX
+ wire [7:0] R3OUTCRLtb; // DATALINES for CONTROL PINS OE,LD,ETC
+ wire [7:0] DTCMDONEtb;  // INPUT 1 DEVICE CMD or DATA
+ wire [7:0] DTCMDTWOtb;  // INPUT 2 DEVICE CMD or DATA
+ wire [7:0] DTCMDTHREEtb; // INPUT 3 DEVICE CMD or DATA
+ wire [7:0] DTCMDFOURtb;  // INPUT 4 DEVICE CMD or DATA
+ reg [7:0] DTINONEtb;    // DATA OUTPUT from DEVICE 1
+ reg [7:0] DTWtb;    // DATA OUTPUT from DEVICE 2
+ reg [7:0] DTINTHREtb;    // DATA OUTPUT from DEVICE 3
+ reg [7:0] DTINFOURtb;    // DATA OUTPUT from DEVICE 4
+ wire [7:0] AMBAOUTtb;     // MUX BUS TO PROCESSOR
+ wire [3:0] CLKBUStb;       // MULTIPLE CLOCK
+ wire [3:0] RSTBUStb;       // MULTIPLE RESET FOR ALL DEVICES
+
+TUVMBA UUT(rsttb, clktb,R3CTRLtb,R4DATAtb,R5ADDRtb,R3OUTCRLtb,DTCMDONEtb,DTCMDTWOtb,DTCMDTHREEtb,DTCMDFOURtb,DTINONEtb,DTWtb,DTINTHREtb,DTINFOURtb,AMBAOUTtb,CLKBUStb,RSTBUStb);
+
+initial
+begin
+rsttb=1'b0; clktb=1'b0; R3CTRLtb=7'h77; R4DATAtb=8'h11; R5ADDRtb=8'h00;
+DTINONEtb=8'h66; DTINTHREtb=8'h88; DTINFOURtb=8'h99; DTWtb=8'h77;
+#10 rsttb=1'b1;
+end
+
+always #5clktb=~clktb;
+
+initial 
+begin
+#30 R3CTRLtb=7'h33; R4DATAtb=8'h22; R5ADDRtb=8'h11;
+#10 R3CTRLtb=7'h22; R4DATAtb=8'h33; R5ADDRtb=8'h22;
+#10 R3CTRLtb=7'h11; R4DATAtb=8'h44; R5ADDRtb=8'h33;
+#10 R3CTRLtb=7'h33; R4DATAtb=8'h22; R5ADDRtb=8'h01;
+#10 R3CTRLtb=7'h22; R4DATAtb=8'h33; R5ADDRtb=8'h12;
+#10 R3CTRLtb=7'h11; R4DATAtb=8'h44; R5ADDRtb=8'h23;
+end
+
+endmodule
